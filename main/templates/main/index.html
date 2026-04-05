@@ -1,0 +1,162 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block content %}
+  <main class="page">
+    <section class="hero">
+      <div class="hero-text">
+        <p class="kicker">MoodAI Studio</p>
+        <h1>Kayfiyatga mos, strukturali yechimlar laboratoriyasi</h1>
+        <p class="subtitle">
+          Real muammo, real mood. AI sizga 3 bosqichli plan, aniqlashtirilgan action va tags bilan yordam beradi.
+        </p>
+        <div class="hero-badges">
+          <span class="badge">Insight + Action</span>
+          <span class="badge">3-Step Plan</span>
+          <span class="badge">Mood Analytics</span>
+        </div>
+      </div>
+      <div class="hero-card">
+        <form id="mood-form" class="form" method="post" novalidate>
+          {% csrf_token %}
+          <label class="field">
+            <span class="label">Sarlavha</span>
+            <input
+              type="text"
+              name="title"
+              id="title"
+              placeholder="Masalan: Bugungi deadline strategiyasi"
+            />
+          </label>
+          <label class="field">
+            <span class="label">Muammoingizni yozing</span>
+            <textarea
+              name="problem"
+              id="problem"
+              rows="4"
+              placeholder="Masalan: deadline yaqin, boshim qotib qoldi..."
+              required
+            ></textarea>
+          </label>
+          <div class="field">
+            <span class="label">Hozirgi kayfiyat</span>
+            <div class="mood-grid">
+              <label class="mood">
+                <input type="radio" name="mood" value="happy" />
+                <span>Happy</span>
+              </label>
+              <label class="mood">
+                <input type="radio" name="mood" value="stressed" />
+                <span>Stressed</span>
+              </label>
+              <label class="mood">
+                <input type="radio" name="mood" value="tired" />
+                <span>Tired</span>
+              </label>
+              <label class="mood">
+                <input type="radio" name="mood" value="motivated" />
+                <span>Motivated</span>
+              </label>
+            </div>
+          </div>
+          <label class="field">
+            <span class="label">Intensity (1-5)</span>
+            <input type="range" id="intensity" name="intensity" min="1" max="5" value="3" />
+          </label>
+          <label class="field">
+            <span class="label">Teglar (ixtiyoriy)</span>
+            <input type="text" id="tags" name="tags" placeholder="masalan: deadline, focus, exam" />
+          </label>
+          <button class="primary" type="submit">Yordam ber</button>
+          <p class="hint">Natija 1-2 soniya ichida ko'rsatiladi.</p>
+        </form>
+      </div>
+    </section>
+
+    <section class="result" id="result" hidden>
+      <div class="result-header">
+        <h2>AI javobi</h2>
+        <span id="result-emoji" class="emoji">✨</span>
+      </div>
+      <p id="result-text" class="result-text"></p>
+      <div class="action">
+        <span class="action-title">Kichik qadam</span>
+        <p id="result-action"></p>
+      </div>
+      <div class="steps">
+        <h3>3 bosqichli plan</h3>
+        <ul id="result-steps"></ul>
+      </div>
+      <div class="tags" id="result-tags"></div>
+    </section>
+
+    <section class="insights">
+      <div class="insights-header">
+        <h2>Haftalik insight</h2>
+        <span class="history-note">Personal trendlar</span>
+      </div>
+      {% if insights %}
+        <div class="insight-grid">
+          {% for insight in insights %}
+            <article class="insight-card">
+              <p class="insight-title">Hafta: {{ insight.week_start|date:"d.m.Y" }}</p>
+              <p class="insight-text">{{ insight.summary }}</p>
+              {% if insight.mood_trend %}
+                <p class="insight-trend">{{ insight.mood_trend }}</p>
+              {% endif %}
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="hint">Hozircha insight yo'q. 3-5 ta so'rovdan keyin avtomatik chiqadi.</p>
+      {% endif %}
+    </section>
+
+    <section class="history">
+      <div class="history-header">
+        <h2>So'nggi so'rovlar</h2>
+        <span class="history-note">Oxirgi 10 ta</span>
+      </div>
+      {% if history %}
+        <div class="history-list">
+          {% for item in history %}
+            <article class="history-item">
+              <div class="history-meta">
+                <span class="history-mood">{{ item.get_mood_display }}</span>
+                <span class="history-date">{{ item.created_at|date:"d.m.Y H:i" }}</span>
+              </div>
+              {% if item.title %}
+                <p class="history-title">{{ item.title }}</p>
+              {% endif %}
+              <p class="history-problem">{{ item.problem_text }}</p>
+              <p class="history-intensity">Intensity: {{ item.intensity }}/5</p>
+              <div class="history-answer">
+                <span class="emoji">{{ item.emoji }}</span>
+                <p>{{ item.response_text }}</p>
+              </div>
+              <p class="history-action"><strong>Action:</strong> {{ item.action_prompt }}</p>
+              {% if item.steps.count %}
+                <ol class="history-steps">
+                  {% for step in item.steps.all %}
+                    <li>{{ step.text }}</li>
+                  {% endfor %}
+                </ol>
+              {% endif %}
+              {% if item.tag_list %}
+                <div class="tags">
+                  {% for tag in item.tag_list %}
+                    <span class="tag">{{ tag }}</span>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="hint">Hali so'rovlar yo'q. Birinchi so'rovni yuboring.</p>
+      {% endif %}
+    </section>
+  </main>
+
+  <script src="{% static 'main/app.js' %}"></script>
+{% endblock %}

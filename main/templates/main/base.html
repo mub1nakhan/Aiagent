@@ -1,0 +1,28 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}AI Mood-Based Solution{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'main/styles.css' %}" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="{% url 'home' %}">MoodAI</a>
+        <nav class="nav">
+          {% if user.is_authenticated %}
+            <span class="nav-user">Salom, {{ user.username }}</span>
+            <a class="nav-link" href="{% url 'logout' %}">Chiqish</a>
+          {% else %}
+            <a class="nav-link" href="{% url 'login' %}">Kirish</a>
+            <a class="nav-link" href="{% url 'register' %}">Ro'yxatdan o'tish</a>
+          {% endif %}
+        </nav>
+      </div>
+    </header>
+    {% block content %}{% endblock %}
+  </body>
+</html>

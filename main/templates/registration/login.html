@@ -1,0 +1,31 @@
+{% extends "main/base.html" %}
+
+{% block title %}Kirish{% endblock %}
+
+{% block content %}
+  <main class="auth-page">
+    <section class="auth-card">
+      <h1>Kirish</h1>
+      <p class="subtitle">Loyihadan foydalanish uchun login qiling.</p>
+      <form method="post" class="form">
+        {% csrf_token %}
+        {% if form.errors %}
+          <p class="form-error">Login yoki parol noto'g'ri.</p>
+        {% endif %}
+        <label class="field">
+          <span class="label">Username</span>
+          {{ form.username }}
+        </label>
+        <label class="field">
+          <span class="label">Parol</span>
+          {{ form.password }}
+        </label>
+        <button class="primary" type="submit">Kirish</button>
+      </form>
+      <p class="hint">
+        Akkauntingiz yo'qmi?
+        <a href="{% url 'register' %}">Ro'yxatdan o'tish</a>
+      </p>
+    </section>
+  </main>
+{% endblock %}

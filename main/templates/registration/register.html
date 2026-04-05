@@ -1,0 +1,35 @@
+{% extends "main/base.html" %}
+
+{% block title %}Ro'yxatdan o'tish{% endblock %}
+
+{% block content %}
+  <main class="auth-page">
+    <section class="auth-card">
+      <h1>Ro'yxatdan o'tish</h1>
+      <p class="subtitle">Yangi akkaunt yarating va davom eting.</p>
+      <form method="post" class="form">
+        {% csrf_token %}
+        {% if form.errors %}
+          <p class="form-error">Ma'lumotlarni to'g'ri kiriting.</p>
+        {% endif %}
+        <label class="field">
+          <span class="label">Username</span>
+          {{ form.username }}
+        </label>
+        <label class="field">
+          <span class="label">Parol</span>
+          {{ form.password1 }}
+        </label>
+        <label class="field">
+          <span class="label">Parolni tasdiqlang</span>
+          {{ form.password2 }}
+        </label>
+        <button class="primary" type="submit">Ro'yxatdan o'tish</button>
+      </form>
+      <p class="hint">
+        Akkountingiz bormi?
+        <a href="{% url 'login' %}">Kirish</a>
+      </p>
+    </section>
+  </main>
+{% endblock %}
