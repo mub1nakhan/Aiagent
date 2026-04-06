@@ -140,27 +140,45 @@ def _generate_local_solution(problem_text: str, mood: str) -> MoodSolution:
     )
 
 
-def generate_solution(problem_text: str, mood: str) -> MoodSolution:
+def generate_solution(
+    problem_text: str,
+    mood: str,
+    title: str = "",
+    tags: str = "",
+    intensity: int = 3,
+) -> MoodSolution:
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key or not _OPENAI_AVAILABLE:
+        if getattr(settings, "OPENAI_REQUIRED", True):
+            raise RuntimeError("OPENAI_UNAVAILABLE")
         return _generate_local_solution(problem_text, mood)
 
     model_name = getattr(settings, "OPENAI_MODEL", "gpt-5.4-mini")
     instructions = (
-        "Siz mood-based yordamchi siz. Javobni faqat JSON formatida qaytaring. "
+        "Siz mood-based yordamchi siz. Vaziyatga mos, kontekstli yechim bering. "
+        "Javobni faqat JSON formatida qaytaring. "
         "Kalitlar: response_text, emoji, action_prompt, steps, tags. "
-        "response_text 1-3 jumla, emoji bitta emoji, action_prompt qisqa va aniq. "
+        "response_text 2-4 jumla bo'lsin va muammo kontekstini aks ettirsin. "
+        "emoji bitta bo'lsin. action_prompt 1 ta aniq qadam. "
         "steps 3 ta qisqa qadamdan iborat list bo'lsin. "
         "tags 2-4 ta qisqa teglar."
     )
-    user_input = f"Muammo: {problem_text}\nMood: {mood}"
+    user_input = (
+        f"Sarlavha: {title}\n"
+        f"Muammo: {problem_text}\n"
+        f"Mood: {mood}\n"
+        f"Intensity: {intensity}/5\n"
+        f"User tags: {tags}"
+    )
 
     try:
         client = OpenAI()
         response = client.responses.create(
             model=model_name,
-            instructions=instructions,
-            input=user_input,
+            input=[
+                {"role": "developer", "content": instructions},
+                {"role": "user", "content": user_input},
+            ],
         )
         raw_text = response.output_text
         data = json.loads(raw_text)
@@ -186,6 +204,8 @@ def generate_solution(problem_text: str, mood: str) -> MoodSolution:
             model_used=model_name,
         )
     except Exception:
+        if getattr(settings, "OPENAI_REQUIRED", True):
+            raise RuntimeError("OPENAI_RESPONSE_ERROR")
         return _generate_local_solution(problem_text, mood)
 
 

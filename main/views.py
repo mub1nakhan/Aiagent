@@ -65,7 +65,24 @@ def solve_api(request):
     if errors:
         return JsonResponse({"ok": False, "errors": errors}, status=400)
 
-    solution = generate_solution(problem_text, mood)
+    try:
+        solution = generate_solution(
+            problem_text=problem_text,
+            mood=mood,
+            title=title,
+            tags=tags,
+            intensity=intensity,
+        )
+    except RuntimeError as exc:
+        if str(exc) == "OPENAI_UNAVAILABLE":
+            return JsonResponse(
+                {"ok": False, "errors": {"openai": "OpenAI API key topilmadi yoki SDK yo'q."}},
+                status=500,
+            )
+        return JsonResponse(
+            {"ok": False, "errors": {"openai": "OpenAI javobini qayta ishlashda xatolik."}},
+            status=500,
+        )
 
     record = MoodRequest.objects.create(
         user=request.user,

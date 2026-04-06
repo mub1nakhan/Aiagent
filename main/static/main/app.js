@@ -48,7 +48,11 @@ form.addEventListener("submit", async (event) => {
 
     const data = await response.json();
     if (!data.ok) {
-      alert("Xatolik: " + JSON.stringify(data.errors));
+      const message = data.errors?.openai || "Xatolik yuz berdi.";
+      resultText.textContent = message;
+      resultEmoji.textContent = "⚠️";
+      resultAction.textContent = "";
+      resultBox.hidden = false;
       return;
     }
 
